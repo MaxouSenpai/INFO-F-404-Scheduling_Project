@@ -30,6 +30,9 @@ class Task:
     def getPeriod(self):
         return self.period
 
+    def getID(self):
+        return self.id
+
     def __repr__(self):
         return str(self.offset) + "|" + str(self.WCET) + "|" + str(self.deadline) + "|" + str(self.period)
 
@@ -55,30 +58,31 @@ class Partitioner:
         else:
             partitionedTasks = self.nextFit(tasks)
 
-        if self.sort == "iu":
-            partitionedTasks = self.increaseUtilisation(partitionedTasks)
-        else:
-            partitionedTasks = self.decreasingUtilisation(partitionedTasks)
+        self.sortUtilisation(partitionedTasks)
 
-        return [partitionedTasks]
+        return partitionedTasks
+
+    #  Task: WCET Deadline
 
     def firstFit(self, tasks):
-        return tasks
+        return [tasks]
 
     def worstFit(self, tasks):
-        return tasks
+        return [tasks]
 
     def bestFit(self, tasks):
-        return tasks
+        return [tasks]
 
     def nextFit(self, tasks):
-        return tasks
+        return [tasks]
 
-    def increaseUtilisation(self, partitionedTasks):
-        return partitionedTasks
+    def sortUtilisation(self, partitionedTasks):
+        partitionedTasks.sort(reverse=self.sort == "du", key=lambda core: sum(t.getWCET() for t in core))
 
-    def decreasingUtilisation(self, partitionedTasks):
-        return partitionedTasks
+
+class CorePartition:
+    def __init__(self):
+        self.tasks = []
 
 
 class EDFScheduler:
@@ -86,85 +90,93 @@ class EDFScheduler:
         self.timeLimit = timeLimit
 
     def schedule(self, partitionedTasks):
-        print(self.timeLimit)
+        print("Time limit : " + str(self.timeLimit))
         print(partitionedTasks)
 
         for i in range(len(partitionedTasks)):
             self.scheduleSingleCore(partitionedTasks[i], i)
 
-        print(partitionedTasks)
-
     def scheduleSingleCore(self, tasks, no):
+        print("Core : " + str(no))
         t = 0
         jobs = [Job(j) for j in tasks]
-        jobs.sort()  # earliest deadline first
         events = []
         currentJob = None
-        while t < self.timeLimit:
 
-            for job in jobs:
-                if job.isReleased(t):
-                    events.append([t, "rel", "J" + str(job.task.id)])
-            # deadline
-            if currentJob is None or not currentJob.canStillRun():
-                currentJob = None
-                for job in jobs:
-                    if job.canRerun() or job.canRun(t):
-                        currentJob = job
-                        currentJob.run()
-                        break
-
+        while t <= self.timeLimit:
             if currentJob is not None:
-                events.append([t, "run", "T" + str(currentJob.task.id) + "|J" + str(currentJob.id)])
-            else:
-                events.append([t, "idle"])
+                if not currentJob.isRunning():
+                    currentJob = None
+                else:
+                    events.append([t, repr(currentJob)])
+
+            #  Test
+            """
+            jobs.sort(key=lambda j: j.task.id)
+            for job in jobs:
+                print(str(job.getNextDeadLine()) + " ", end="")
+            print()
+            print("-" * 10)
+            """
+            if currentJob is None:  # Search a job to execute
+                jobs.sort(key=lambda j: j.getNextDeadLine())
+                j = 0
+
+                while j < len(jobs) and currentJob is None:
+                    if jobs[j].canRun(t):
+                        jobs[j].run()
+                        currentJob = jobs[j]
+                        events.append([t, repr(currentJob)])
+                    j += 1
+
+                if currentJob is None:  # If no job found
+                    events.append([t, "idle"])
 
             for job in jobs:
                 job.addTimeUnit()
-
             t += 1
-        print(events)
+
+        for e in events:
+            print(e)
 
 
 class Job:
     def __init__(self, task):
         self.task = task
+        self.running = False
         self.executionTime = 0
         self.idleTime = 0
-        self.id = -1
-        self.running = False
-
-    def isReleased(self, t):
-        return self.task.getOffset() == t
+        self.no = 0  # Number of times that the job ran
 
     def addTimeUnit(self):
         if self.running:
             self.executionTime += 1
-            if self.executionTime == self.task.getWCET():
+            if self.executionTime == self.task.getWCET():  # Finished
                 self.running = False
+                self.no += 1
+
         else:
             self.idleTime += 1
+
+        if self.executionTime + self.idleTime == self.task.getPeriod():
+            self.executionTime = 0
+            self.idleTime = 0
+
+    def getNextDeadLine(self):
+        return self.task.getOffset() + self.task.getPeriod() * self.no + self.task.getDeadline()
+
+    def run(self):
+        self.running = True
+
+    def canRun(self, t):
+        return self.task.getOffset() <= t and self.executionTime == 0
 
     def isRunning(self):
         return self.running
 
-    def canStillRun(self):
-        return self.executionTime < self.task.getWCET()
+    def __repr__(self):
+        return "T{}|J{}".format(self.task.getID(), self.no)
 
-    def canRerun(self):
-        return self.executionTime + self.idleTime >= self.task.getPeriod()
-
-    def canRun(self, t):
-        return t >= self.task.getOffset() and self.executionTime == 0
-
-    def run(self):
-        self.id += 1
-        self.idleTime = 0
-        self.executionTime = 0
-        self.running = True
-
-    def __lt__(self, other):
-        return self.task < other.task
 
 def taskParser(taskFile):
     tasks = []
