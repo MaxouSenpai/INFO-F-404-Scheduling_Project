@@ -36,9 +36,6 @@ class Task:
     def __repr__(self):
         return str(self.offset) + "|" + str(self.WCET) + "|" + str(self.deadline) + "|" + str(self.period)
 
-    def __lt__(self, other):
-        return self.deadline < other.getDeadline()
-
 
 class Partitioner:
     def __init__(self, heuristic, sort, cores):
@@ -65,24 +62,75 @@ class Partitioner:
     #  Task: WCET Deadline
 
     def firstFit(self, tasks):
-        return [tasks]
+        partitionedTasks = [[] for _ in range(self.cores)]
+        for task in tasks:
+            i = 0
+            placed = False
+            while i < self.cores and not placed:
+                if EDFScheduler.isSchedulable(partitionedTasks[i] + [task]):
+                    partitionedTasks[i].append(task)
+                    placed = True
+                i += 1
+            if not placed:
+                raise Exception("Can't be partitioned")
+
+        return partitionedTasks
 
     def worstFit(self, tasks):
-        return [tasks]
+        #  sort by lowest utilisation factor
+        partitionedTasks = [[] for _ in range(self.cores)]
+        for task in tasks:
+            partitionedTasks.sort(key=lambda ts: EDFScheduler.getUtilisationFactor(ts))
+            i = 0
+            placed = False
+            while i < self.cores and not placed:
+                if EDFScheduler.isSchedulable(partitionedTasks[i] + [task]):
+                    partitionedTasks[i].append(task)
+                    placed = True
+                i += 1
+            if not placed:
+                raise Exception("Can't be partitioned")
+
+        return partitionedTasks
 
     def bestFit(self, tasks):
-        return [tasks]
+        #  sort by highest utilisation factor
+        partitionedTasks = [[] for _ in range(self.cores)]
+        for task in tasks:
+            partitionedTasks.sort(reverse=True, key=lambda ts: EDFScheduler.getUtilisationFactor(ts))
+            i = 0
+            placed = False
+            while i < self.cores and not placed:
+                if EDFScheduler.isSchedulable(partitionedTasks[i] + [task]):
+                    partitionedTasks[i].append(task)
+                    placed = True
+                i += 1
+            if not placed:
+                raise Exception("Can't be partitioned")
+
+        return partitionedTasks
 
     def nextFit(self, tasks):
-        return [tasks]
+        #  close processor and take the second
+        partitionedTasks = [[] for _ in range(self.cores)]
+        lastUsedCore = 0
+        for task in tasks:
+            i = lastUsedCore
+            placed = False
+            while i < self.cores and not placed:
+                if EDFScheduler.isSchedulable(partitionedTasks[i] + [task]):
+                    partitionedTasks[i].append(task)
+                    placed = True
+                else:
+                    i += 1
+            lastUsedCore = i
+            if not placed:
+                raise Exception("Can't be partitioned")
+
+        return partitionedTasks
 
     def sortUtilisation(self, partitionedTasks):
         partitionedTasks.sort(reverse=self.sort == "du", key=lambda core: sum(t.getWCET() for t in core))
-
-
-class CorePartition:
-    def __init__(self):
-        self.tasks = []
 
 
 class EDFScheduler:
@@ -139,6 +187,67 @@ class EDFScheduler:
         for e in events:
             print(e)
 
+    @staticmethod
+    def isSchedulable(tasks):
+        timeLimit = max(task.getOffset() + task.getDeadline() for task in tasks)  # TODO verify
+        t = 0
+        jobs = [Job(j) for j in tasks]
+        currentJob = None
+
+        try:
+            while t <= timeLimit:
+                if currentJob is not None:
+                    if not currentJob.isRunning():
+                        currentJob = None
+
+                if currentJob is None:  # Search a job to execute
+                    jobs.sort(key=lambda j: j.getNextDeadLine())
+                    j = 0
+
+                    while j < len(jobs) and currentJob is None:
+                        if jobs[j].canRun(t):
+                            jobs[j].run()
+                            currentJob = jobs[j]
+                        j += 1
+
+                for job in jobs:
+                    job.addTimeUnit()
+                t += 1
+
+        except Exception:
+            return False
+
+        return True
+
+    @staticmethod
+    def getUtilisationFactor(tasks):
+        timeLimit = max(task.getOffset() + task.getDeadline() for task in tasks)  # TODO verify
+        t = 0
+        jobs = [Job(j) for j in tasks]
+        currentJob = None
+        idleTime = 0
+
+        while t <= timeLimit:
+            if currentJob is not None:
+                if not currentJob.isRunning():
+                    currentJob = None
+
+            if currentJob is None:  # Search a job to execute
+                jobs.sort(key=lambda j: j.getNextDeadLine())
+                j = 0
+
+                while j < len(jobs) and currentJob is None:
+                    if jobs[j].canRun(t):
+                        jobs[j].run()
+                        currentJob = jobs[j]
+                    j += 1
+
+            for job in jobs:
+                job.addTimeUnit()
+            t += 1
+
+        return (timeLimit - idleTime) / timeLimit
+
 
 class Job:
     def __init__(self, task):
@@ -157,6 +266,9 @@ class Job:
 
         else:
             self.idleTime += 1
+
+        if self.executionTime + self.idleTime == self.task.getDeadline() and self.executionTime != self.task.getWCET():
+            raise Exception("Deadline not respected")
 
         if self.executionTime + self.idleTime == self.task.getPeriod():
             self.executionTime = 0
