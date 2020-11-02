@@ -45,7 +45,7 @@ class EDFScheduler:
                 j = 0
 
                 while j < len(jobs) and currentJob is None:
-                    if jobs[j].canRun(t):
+                    if jobs[j].canRun():
                         jobs[j].run()
                         currentJob = jobs[j]
                     j += 1
@@ -83,7 +83,7 @@ class EDFScheduler:
                     j = 0
 
                     while j < len(jobs) and currentJob is None:
-                        if jobs[j].canRun(t):
+                        if jobs[j].canRun():
                             jobs[j].run()
                             currentJob = jobs[j]
                         j += 1
@@ -121,7 +121,7 @@ class EDFScheduler:
                 j = 0
 
                 while j < len(jobs) and currentJob is None:
-                    if jobs[j].canRun(t):
+                    if jobs[j].canRun():
                         jobs[j].run()
                         currentJob = jobs[j]
                     j += 1

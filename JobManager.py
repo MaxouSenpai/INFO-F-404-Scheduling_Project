@@ -1,8 +1,8 @@
 from Event import Event, EventType
 
 
-class JobManager:
-    """Job Object"""
+class JobManager:  # TODO fix remaining offset bugs
+    """JobManager Object"""
 
     def __init__(self, task, timeline=None):
         """
@@ -19,17 +19,17 @@ class JobManager:
         self.ran = False
         if self.timeline is not None and self.task == 0:
             self.timeline.addEvent(Event(EventType.RELEASE, [self.task.getID(), self.no]), 0)
+        self.t = 0
 
     def addTimeUnit(self):
         """
         Add a unit of time and update the status of the current job
         """
+        self.t += 1
         if self.running:
             self.executionTime += 1
         else:
             self.idleTime += 1
-
-        t = self.task.getOffset() + self.no * self.task.getPeriod() + self.executionTime + self.idleTime
 
         # Finished or still running
         if self.running:
@@ -38,23 +38,23 @@ class JobManager:
                 self.ran = True
 
             elif self.timeline is not None:  # Still running
-                self.timeline.addEvent(Event(EventType.RUNNING, [self.task.getID(), self.no]), t)
+                self.timeline.addEvent(Event(EventType.RUNNING, [self.task.getID(), self.no]), self.t)
 
         # Deadline
         if self.executionTime + self.idleTime == self.task.getDeadline():  # Deadline reached
             if self.executionTime != self.task.getWCET():
                 raise Exception("Deadline not respected")
             if self.timeline is not None:
-                self.timeline.addEvent(Event(EventType.DEADLINE, [self.task.getID(), self.no]), t)
+                self.timeline.addEvent(Event(EventType.DEADLINE, [self.task.getID(), self.no]), self.t)
 
         # Period
-        if self.executionTime + self.idleTime == self.task.getPeriod():
+        if self.executionTime + self.idleTime == self.task.getPeriod() or self.task.getOffset() == self.t:
             self.executionTime = 0
             self.idleTime = 0
             self.no += 1
             self.ran = False
             if self.timeline is not None:
-                self.timeline.addEvent(Event(EventType.RELEASE, [self.task.getID(), self.no]), t)
+                self.timeline.addEvent(Event(EventType.RELEASE, [self.task.getID(), self.no]), self.t)
 
     def getNextDeadLine(self):
         """
@@ -75,13 +75,12 @@ class JobManager:
             t = self.task.getOffset() + self.no * self.task.getPeriod() + self.idleTime
             self.timeline.addEvent(Event(EventType.RUNNING, [self.task.getID(), self.no]), t)
 
-    def canRun(self, t):  # TODO remove the t parameter
+    def canRun(self):
         """
         Verify if the current job can be run
-        :param t: the time
         :return: True if the current job can run else False
         """
-        return self.task.getOffset() <= t and self.executionTime == 0
+        return self.task.getOffset() <= self.t and self.executionTime == 0
 
     def isRunning(self):
         """
