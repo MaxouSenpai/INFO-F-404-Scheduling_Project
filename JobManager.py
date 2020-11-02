@@ -1,7 +1,7 @@
 from Event import Event, EventType
 
 
-class JobManager:  # TODO Rename?
+class JobManager:
     """Job Object"""
 
     def __init__(self, task, timeline=None):
