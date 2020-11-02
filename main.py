@@ -17,6 +17,8 @@ def run(taskSetFile, heuristic, sort, limit, cores):
     print()
     prettyPrintOptions(heuristic, sort, limit, cores)
     print()
+    prettyPrintPartitions(partitionedTask)
+    print()
     prettyPrintTimelines(timelines)
 
 
@@ -51,6 +53,13 @@ def prettyPrintOptions(heuristic, sort, limit, cores):
     print("\tLimit : {}".format(limit))
 
     print("\tCores : {}".format(cores))
+
+
+def prettyPrintPartitions(partitions):
+    print("The partitions :")
+    for c in range(len(partitions)):
+        print("\tCore {} has ".format(c), end="")
+        print(" and ".join(t.str() for t in sorted(partitions[c], key=lambda t: t.getID())))
 
 
 def prettyPrintTimelines(timelines):

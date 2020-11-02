@@ -78,6 +78,8 @@ class EDFScheduler:
 
     @staticmethod
     def getUtilisationFactor(tasks):
+        if len(tasks) == 0:
+            return 0
         timeLimit = max(task.getOffset() + task.getDeadline() for task in tasks)  # TODO verify
         t = 0
         jobs = [Job(j) for j in tasks]

@@ -22,8 +22,16 @@ class Task:
     def getID(self):
         return self.id
 
+    def str(self):
+        return "Task {}".format(self.id)
+
+    def detailedStr(self):
+        return "Task {} : offset = {} WCET = {} deadline = {} period = {}".format(self.id, self.offset, self.WCET,
+                                                                                  self.deadline, self.period)
+
     def __repr__(self):
         return str(self.offset) + "|" + str(self.WCET) + "|" + str(self.deadline) + "|" + str(self.period)
 
     def __str__(self):
-        return "Task {} : offset = {} WCET = {} deadline = {} period = {}".format(self.id, self.offset, self.WCET, self.deadline, self.period)
+        return "Task {} : offset = {} WCET = {} deadline = {} period = {}".format(self.id, self.offset, self.WCET,
+                                                                                  self.deadline, self.period)
