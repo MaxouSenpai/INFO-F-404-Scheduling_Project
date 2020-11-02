@@ -1,13 +1,16 @@
 class Event:
+    """Event Object"""
 
     def __init__(self, eventType, value=None):
         self.eventType = eventType
         self.value = value
 
     def getType(self):
+        """Return the type of the event"""
         return self.eventType
 
     def getValue(self):
+        """Return the value of the event"""
         return self.value
 
     def __repr__(self):
@@ -34,6 +37,7 @@ class Event:
 
 
 class EventType:
+    """Enum all the possible types of events"""
     IDLE = 0
     RUNNING = 1
     RELEASE = 2

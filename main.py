@@ -6,6 +6,15 @@ from EDFScheduler import EDFScheduler
 
 
 def run(taskSetFile, heuristic, sort, limit, cores):
+    """
+    Run the program with the specified parameters &
+    Print the results in a nice and readable style
+    :param taskSetFile: the task set file
+    :param heuristic: the heuristic option
+    :param sort: the sorting option
+    :param limit: the time limit
+    :param cores: the number of cores
+    """
     partitioner = Partitioner(heuristic, sort, cores)
     tasks = TaskParser.parse(taskSetFile)
     partitionedTask = partitioner.partition(tasks)
@@ -23,12 +32,24 @@ def run(taskSetFile, heuristic, sort, limit, cores):
 
 
 def prettyPrintTasks(taskSetFile, tasks):
+    """
+    Print the partitions in a nice and readable style
+    :param taskSetFile: the task set file
+    :param tasks: the tasks
+    """
     print("The tasks in " + taskSetFile + " :")
     for task in tasks:
         print("\t" + str(task))
 
 
 def prettyPrintOptions(heuristic, sort, limit, cores):
+    """
+    Print the options in a nice and readable style
+    :param heuristic: the heuristic option
+    :param sort: the sorting option
+    :param limit: the time limit option
+    :param cores: the number of cores
+    """
     print("The options : ")
     print("\tHeuristic : ", end="")
     if heuristic == "ff":
@@ -56,6 +77,10 @@ def prettyPrintOptions(heuristic, sort, limit, cores):
 
 
 def prettyPrintPartitions(partitions):
+    """
+    Print the partitions in a nice and readable style
+    :param partitions: the partitions
+    """
     print("The partitions :")
     for c in range(len(partitions)):
         print("\tCore {} has ".format(c), end="")
@@ -63,6 +88,10 @@ def prettyPrintPartitions(partitions):
 
 
 def prettyPrintTimelines(timelines):
+    """
+    Print the timelines in a nice and readable style
+    :param timelines: the timelines
+    """
     print("The EDF scheduling :")
     for i in range(len(timelines)):
         timelines[i].sort()
@@ -71,6 +100,9 @@ def prettyPrintTimelines(timelines):
 
 
 def main():
+    """
+    Verify that the program has all the required options and then launch it if so
+    """
     if len(sys.argv) < 8:
         raise Exception("At least three options are needed")
 

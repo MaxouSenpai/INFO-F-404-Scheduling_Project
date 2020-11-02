@@ -2,9 +2,15 @@ from Task import Task
 
 
 class TaskParser:
+    """TaskParser Util"""
 
     @staticmethod
     def parse(taskFile):
+        """
+        Parse the tasks contained in the specified file
+        :param taskFile: the file containing the tasks
+        :return: the parsed tasks
+        """
         tasks = []
         with open(taskFile) as file:
             tid = 0
