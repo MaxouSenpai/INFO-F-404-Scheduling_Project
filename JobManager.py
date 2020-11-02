@@ -11,12 +11,11 @@ class JobManager:
         :param timeline: the timeline that has to be completed during the execution
         """
         self.task = task
+        self.timeline = timeline
         self.running = False
         self.executionTime = 0
         self.idleTime = 0
         self.no = 0  # Number of passed periods
-        self.timeline = timeline
-        self.ran = False
         if self.timeline is not None and self.task.getOffset() == 0:
             self.timeline.addEvent(Event(EventType.RELEASE, [self.task.getID(), self.no]), 0)
         self.t = 0
@@ -42,7 +41,6 @@ class JobManager:
         if self.executionTime + self.idleTime == self.task.getPeriod() or self.task.getOffset() == self.t:
             self.executionTime = 0
             self.idleTime = 0
-            self.ran = False
             if self.task.getOffset() != self.t:
                 self.no += 1
             if self.timeline is not None:
@@ -65,7 +63,6 @@ class JobManager:
         if self.running:
             if self.executionTime == self.task.getWCET():  # Finished
                 self.running = False
-                self.ran = True
 
             elif self.timeline is not None:  # Still running
                 self.timeline.addEvent(Event(EventType.RUNNING, [self.task.getID(), self.no]), self.t)
@@ -75,7 +72,7 @@ class JobManager:
         Return the next deadline
         :return: the next deadline
         """
-        if self.ran:
+        if self.executionTime != 0:
             return self.task.getOffset() + self.task.getPeriod() * self.no+1 + self.task.getDeadline()
         else:
             return self.task.getOffset() + self.task.getPeriod() * self.no + self.task.getDeadline()
