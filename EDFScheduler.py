@@ -81,37 +81,7 @@ class EDFScheduler:
                     job.addTimeUnit()
                 t += 1
 
-        except Exception as e:
+        except Exception:
             return False
 
         return True
-
-    @staticmethod
-    def getUtilisationFactor(tasks):
-        """
-        Return the utilisation factor of the specified tasks
-        :param tasks: the tasks
-        :return: the utilisation factor
-        """
-        if len(tasks) == 0:
-            return 0
-        timeLimit = max(task.getOffset() + task.getDeadline() for task in tasks)  # TODO verify
-        t = 0
-        jobs = [JobManager(j) for j in tasks]
-        idleTime = 0
-
-        while t <= timeLimit:
-            jobs.sort(key=lambda j: j.getNextDeadLine())
-            j = 0
-            found = False
-            while j < len(jobs) and not found:
-                if jobs[j].canRun():
-                    jobs[j].run()
-                    found = True
-                j += 1
-
-            for job in jobs:
-                job.addTimeUnit()
-            t += 1
-
-        return (timeLimit - idleTime) / timeLimit

@@ -64,7 +64,7 @@ class Partitioner:
         #  sort by lowest utilisation factor
         partitionedTasks = [[] for _ in range(self.cores)]
         for task in tasks:
-            partitionedTasks.sort(key=lambda ts: EDFScheduler.getUtilisationFactor(ts))
+            partitionedTasks.sort(key=lambda ts: Partitioner.getUtilisationFactor(ts))
             i = 0
             placed = False
             while i < self.cores and not placed:
@@ -86,7 +86,7 @@ class Partitioner:
         #  sort by highest utilisation factor
         partitionedTasks = [[] for _ in range(self.cores)]
         for task in tasks:
-            partitionedTasks.sort(reverse=True, key=lambda ts: EDFScheduler.getUtilisationFactor(ts))
+            partitionedTasks.sort(reverse=True, key=lambda ts: Partitioner.getUtilisationFactor(ts))
             i = 0
             placed = False
             while i < self.cores and not placed:
@@ -129,4 +129,13 @@ class Partitioner:
         The sort depends on the sorting option chosen
         :param partitionedTasks: the partitioned tasks
         """
-        partitionedTasks.sort(reverse=self.sort == "du", key=lambda core: sum(t.getWCET() for t in core))
+        partitionedTasks.sort(reverse=self.sort == "du", key=lambda core: Partitioner.getUtilisationFactor(core))
+
+    @staticmethod
+    def getUtilisationFactor(tasks):
+        """
+        Return the utilisation factor of the tasks
+        :param tasks: the tasks
+        :return: the utilisation factor
+        """
+        return sum(task.getUtilisationFactor() for task in tasks)

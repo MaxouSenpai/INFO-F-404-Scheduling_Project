@@ -84,7 +84,10 @@ def prettyPrintPartitions(partitions):
     print("The partitions :")
     for c in range(len(partitions)):
         print("\tCore {} has ".format(c), end="")
-        print(" and ".join(t.str() for t in sorted(partitions[c], key=lambda t: t.getID())))
+        if len(partitions[c]) > 0:
+            print(" and ".join(t.str() for t in sorted(partitions[c], key=lambda t: t.getID())))
+        else:
+            print("no task")
 
 
 def prettyPrintTimelines(timelines):

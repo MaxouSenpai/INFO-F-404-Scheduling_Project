@@ -47,6 +47,10 @@ class Task:
         return "Task {} : offset = {} WCET = {} deadline = {} period = {}".format(self.id, self.offset, self.WCET,
                                                                                   self.deadline, self.period)
 
+    def getUtilisationFactor(self):
+        """Return the utilisation factor of the task"""
+        return self.WCET / self.period
+
     def __repr__(self):
         return str(self.offset) + "|" + str(self.WCET) + "|" + str(self.deadline) + "|" + str(self.period)
 
