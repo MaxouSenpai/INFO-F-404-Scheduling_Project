@@ -18,34 +18,32 @@ class JobManager:
             self.timeline.addEvent(Event(EventType.RELEASE, [self.task.getID(), self.no]), 0)
         self.t = 0
 
+    def isDeadlineReached(self):
+        """Return True if the deadline is reached else False"""
+        return self.task.getOffset() + self.no * self.task.getPeriod() + self.task.getDeadline() == self.t
+
+    def isPeriodReached(self):
+        """Return True if the period is reached else False"""
+        return self.task.getOffset() + (self.no+1) * self.task.getPeriod() == self.t
+
+    def isOffsetReached(self):
+        """Return True if the offset is reached"""
+        return self.task.getOffset() == self.t
+
     def addTimeUnit(self):
         """
         Add a unit of time and update the status of the current job
         """
         self.t += 1
 
-        self.checkDeadline()
-        self.checkPeriod()
+        if self.isOffsetReached():
+            self.handleRelease()
+        else:
+            if self.isDeadlineReached():
+                self.handleDeadline()
 
-    def checkDeadline(self):
-        """
-        Check if the deadline is reached and act accordingly
-        """
-        if self.task.getOffset() + self.no * self.task.getPeriod() + self.task.getDeadline() == self.t:
-            if self.executionTime != self.task.getWCET():
-                raise Exception("Deadline not respected")
-            if self.timeline is not None:
-                self.timeline.addEvent(Event(EventType.DEADLINE, [self.task.getID(), self.no]), self.t)
-
-    def checkPeriod(self):
-        """
-        Check if the period is reached and act accordingly
-        """
-        if self.task.getOffset() + (self.no+1) * self.task.getPeriod() == self.t:
-            self.executionTime = 0
-            self.no += 1
-            if self.timeline is not None:
-                self.timeline.addEvent(Event(EventType.RELEASE, [self.task.getID(), self.no]), self.t)
+            if self.isPeriodReached():
+                self.handlePeriod()
 
     def getNextDeadLine(self):
         """
@@ -71,3 +69,22 @@ class JobManager:
         :return: True if the current job can run else False
         """
         return self.task.getOffset() <= self.t and self.executionTime < self.task.getWCET()
+
+    def handleRelease(self):
+        """Handle the release event"""
+        if self.timeline is not None:
+            self.timeline.addEvent(Event(EventType.RELEASE, [self.task.getID(), self.no]), self.t)
+
+    def handleDeadline(self):
+        """Handle the deadline event"""
+        if self.executionTime != self.task.getWCET():
+            raise Exception("Deadline not respected")
+        if self.timeline is not None:
+            self.timeline.addEvent(Event(EventType.DEADLINE, [self.task.getID(), self.no]), self.t)
+
+    def handlePeriod(self):
+        """Handle the period event"""
+        self.executionTime = 0
+        self.no += 1
+        if self.timeline is not None:
+            self.timeline.addEvent(Event(EventType.RELEASE, [self.task.getID(), self.no]), self.t)
