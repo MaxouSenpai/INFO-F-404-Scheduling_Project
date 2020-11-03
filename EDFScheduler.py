@@ -34,23 +34,18 @@ class EDFScheduler:
         timeline = Timeline(self.timeLimit+1)
         t = 0
         jobs = [JobManager(j, timeline) for j in tasks]
-        currentJob = None
 
-        while t <= self.timeLimit:
-            if currentJob is not None and not currentJob.isRunning():
-                currentJob = None
+        while t <= self.timeLimit:  # TODO verify time limit
+            jobs.sort(key=lambda j: j.getNextDeadLine())
+            j = 0
+            found = False
+            while j < len(jobs) and not found:
+                if jobs[j].canRun():
+                    jobs[j].run()
+                    found = True
+                j += 1
 
-            if currentJob is None:  # Search a job to execute
-                jobs.sort(key=lambda j: j.getNextDeadLine())
-                j = 0
-
-                while j < len(jobs) and currentJob is None:
-                    if jobs[j].canRun():
-                        jobs[j].run()
-                        currentJob = jobs[j]
-                    j += 1
-
-            if currentJob is None:
+            if not found:
                 timeline.addEvent(Event(EventType.IDLE), t)
 
             if t < self.timeLimit:
@@ -71,28 +66,22 @@ class EDFScheduler:
         timeLimit = max(task.getOffset() + task.getDeadline() for task in tasks)  # TODO verify
         t = 0
         jobs = [JobManager(j) for j in tasks]
-        currentJob = None
 
         try:
             while t <= timeLimit:
-                if currentJob is not None and not currentJob.isRunning():
-                    currentJob = None
-
-                if currentJob is None:  # Search a job to execute
-                    jobs.sort(key=lambda j: j.getNextDeadLine())
-                    j = 0
-
-                    while j < len(jobs) and currentJob is None:
-                        if jobs[j].canRun():
-                            jobs[j].run()
-                            currentJob = jobs[j]
-                        j += 1
-
+                jobs.sort(key=lambda j: j.getNextDeadLine())
+                j = 0
+                found = False
+                while j < len(jobs) and not found:
+                    if jobs[j].canRun():
+                        jobs[j].run()
+                        found = True
+                    j += 1
                 for job in jobs:
                     job.addTimeUnit()
                 t += 1
 
-        except Exception:
+        except Exception as e:
             return False
 
         return True
@@ -109,22 +98,17 @@ class EDFScheduler:
         timeLimit = max(task.getOffset() + task.getDeadline() for task in tasks)  # TODO verify
         t = 0
         jobs = [JobManager(j) for j in tasks]
-        currentJob = None
         idleTime = 0
 
         while t <= timeLimit:
-            if currentJob is not None and not currentJob.isRunning():
-                currentJob = None
-
-            if currentJob is None:  # Search a job to execute
-                jobs.sort(key=lambda j: j.getNextDeadLine())
-                j = 0
-
-                while j < len(jobs) and currentJob is None:
-                    if jobs[j].canRun():
-                        jobs[j].run()
-                        currentJob = jobs[j]
-                    j += 1
+            jobs.sort(key=lambda j: j.getNextDeadLine())
+            j = 0
+            found = False
+            while j < len(jobs) and not found:
+                if jobs[j].canRun():
+                    jobs[j].run()
+                    found = True
+                j += 1
 
             for job in jobs:
                 job.addTimeUnit()
