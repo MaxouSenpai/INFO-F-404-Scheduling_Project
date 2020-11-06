@@ -4,6 +4,11 @@ from Job import Job
 class JobManager:
     """JobManager Object"""
     def __init__(self, task, jobList):
+        """
+        Construct the JobManager
+        :param task: the task
+        :param jobList: the jobList
+        """
         self.task = task
         self.jobList = jobList
 
@@ -11,6 +16,7 @@ class JobManager:
         self.nbReleasedJobs = 0
 
     def addTimeUnit(self):
+        """Release a job if it is the time"""
         self.t += 1
 
         if self.isOffsetReached() or (self.isOffsetPassed() and self.isPeriodReached()):

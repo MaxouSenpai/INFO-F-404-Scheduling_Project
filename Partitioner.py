@@ -1,4 +1,4 @@
-from EDFScheduler import EDFScheduler
+from Scheduler import Scheduler
 
 
 class Partitioner:
@@ -46,7 +46,7 @@ class Partitioner:
             i = 0
             placed = False
             while i < self.cores and not placed:
-                if EDFScheduler.isSchedulable(partitionedTasks[i] + [task]):
+                if Scheduler.isSchedulable(partitionedTasks[i] + [task]):
                     partitionedTasks[i].append(task)
                     placed = True
                 i += 1
@@ -68,7 +68,7 @@ class Partitioner:
             i = 0
             placed = False
             while i < self.cores and not placed:
-                if EDFScheduler.isSchedulable(partitionedTasks[i] + [task]):
+                if Scheduler.isSchedulable(partitionedTasks[i] + [task]):
                     partitionedTasks[i].append(task)
                     placed = True
                 i += 1
@@ -90,7 +90,7 @@ class Partitioner:
             i = 0
             placed = False
             while i < self.cores and not placed:
-                if EDFScheduler.isSchedulable(partitionedTasks[i] + [task]):
+                if Scheduler.isSchedulable(partitionedTasks[i] + [task]):
                     partitionedTasks[i].append(task)
                     placed = True
                 i += 1
@@ -112,7 +112,7 @@ class Partitioner:
             i = lastUsedCore
             placed = False
             while i < self.cores and not placed:
-                if EDFScheduler.isSchedulable(partitionedTasks[i] + [task]):
+                if Scheduler.isSchedulable(partitionedTasks[i] + [task]):
                     partitionedTasks[i].append(task)
                     placed = True
                 else:

@@ -1,8 +1,8 @@
 import sys
 
 from Partitioner import Partitioner
+from Scheduler import Scheduler
 from TaskParser import TaskParser
-from EDFScheduler import EDFScheduler
 
 
 def run(taskSetFile, heuristic, sort, limit, cores):
@@ -19,7 +19,7 @@ def run(taskSetFile, heuristic, sort, limit, cores):
     tasks = TaskParser.parse(taskSetFile)
     partitionedTask = partitioner.partition(tasks)
 
-    scheduler = EDFScheduler(limit)
+    scheduler = Scheduler(limit, "EDF")
     timelines = scheduler.schedule(partitionedTask)
 
     prettyPrintTasks(taskSetFile, tasks)
@@ -71,9 +71,11 @@ def prettyPrintOptions(heuristic, sort, limit, cores):
     else:
         print("unknown")
 
-    print("\tLimit : {}".format(limit))
+    print("\tTime limit : {}".format(limit))
 
     print("\tCores : {}".format(cores))
+
+    print("\tScheduler : {}".format("EDF"))
 
 
 def prettyPrintPartitions(partitions):
