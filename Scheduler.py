@@ -79,4 +79,3 @@ class Scheduler:
             t += 1
 
         return jobsList.verify()  # TODO P96
-

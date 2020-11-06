@@ -3,58 +3,81 @@ from Event import Event, EventType
 
 class EDFJobList:
     def __init__(self, timeline=None):
-        self.jobList = []
-        self.doneJobList = []
+        """Construct the EDFJobList"""
+        self.jobsList = []
+        self.doneJobsList = []
         self.timeline = timeline
         self.t = -1
 
     def add(self, job):
-        self.jobList.append(job)
-        self.jobList.sort(key=lambda j: j.getDeadline())
+        """
+        Add the specified job to the active jobs list
+        :param job: the job to add
+        """
+        self.jobsList.append(job)
+        self.jobsList.sort(key=lambda j: j.getDeadline())
 
         if self.timeline is not None:
             self.timeline.addEvent(Event(EventType.RELEASE, [job.getTaskID(), job.getID()]), job.getReleaseTime())
 
     def addTimeUnit(self):
+        """Add a time unit"""
         self.t += 1
-        if len(self.jobList) >= 1:
-            if not self.jobList[0].isFinished():
-                self.runJob()
-            else:
+        self.update()
+
+        self.updateDoneJobsList()
+
+    def update(self):
+        """Update the active jobs list"""
+        stop = False
+        while len(self.jobsList) > 0 and not stop:
+            job = self.jobsList[0]
+            if job.isFinished():
                 self.remove()
-                if len(self.jobList) >= 1:
+            else:
+                if self.jobsList[0].getDeadline() > self.t:
                     self.runJob()
-                elif self.timeline is not None:
-                    self.timeline.addEvent(Event(EventType.IDLE), self.t)
-        elif self.timeline is not None:
+                    stop = True
+                else:
+                    raise Exception("Deadline not met")
+
+        if self.timeline is not None and len(self.jobsList) == 0:
             self.timeline.addEvent(Event(EventType.IDLE), self.t)
 
+    def updateDoneJobsList(self):
+        """Update the done jobs list"""
         i = 0
         stop = False
-        while i < len(self.doneJobList) and not stop:
-            job = self.doneJobList[i]
+        while i < len(self.doneJobsList) and not stop:
+            job = self.doneJobsList[i]
             if job.getDeadline() <= self.t:
                 i += 1
                 if self.timeline is not None:
                     self.timeline.addEvent(Event(EventType.DEADLINE, [job.getTaskID(), job.getID()]), self.t)
             else:
                 stop = True
-
-        self.doneJobList = self.doneJobList[i:]
+        self.doneJobsList = self.doneJobsList[i:]
 
     def remove(self):
-        self.doneJobList.append(self.jobList[0])
-        self.jobList = self.jobList[1:]
-        self.doneJobList.sort(key=lambda j: j.getDeadline())
+        """Remove the first job of the list and """
+        self.doneJobsList.append(self.jobsList[0])
+        self.jobsList = self.jobsList[1:]
+        self.doneJobsList.sort(key=lambda j: j.getDeadline())
 
     def verify(self):
-        for job in self.jobList:
+        """
+        Verify the integrity of the active jobs list
+        Verify that the deadline is not passed
+        :return:
+        """
+        for job in self.jobsList:
             if job.getDeadline() < self.t or (job.getDeadline() == self.t and job.executionTime != job.resources):
                 return False
         return True
 
     def runJob(self):
-        job = self.jobList[0]
+        """Run the first job of the active jobs list"""
+        job = self.jobsList[0]
         job.run()
         if self.timeline is not None:
             self.timeline.addEvent(Event(EventType.RUNNING, [job.getTaskID(), job.getID()]), self.t)

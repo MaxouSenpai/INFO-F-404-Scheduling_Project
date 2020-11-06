@@ -16,7 +16,7 @@ class JobManager:
         self.nbReleasedJobs = 0
 
     def addTimeUnit(self):
-        """Release a job if it is the time"""
+        """Release a job if it needs to"""
         self.t += 1
 
         if self.isOffsetReached() or (self.isOffsetPassed() and self.isPeriodReached()):
