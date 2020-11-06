@@ -1,6 +1,7 @@
 from JobManager import JobManager
 from Timeline import Timeline
 from Event import Event, EventType
+import numpy as np
 
 
 class EDFScheduler:
@@ -33,24 +34,15 @@ class EDFScheduler:
         """
         timeline = Timeline(self.timeLimit+1)
         t = 0
-        jobs = [JobManager(j, timeline) for j in tasks]
+        jobList = EDFJobList(timeline)
+        jobManagers = [JobManager(j, jobList) for j in tasks]
 
         while t <= self.timeLimit:  # TODO verify time limit
-            jobs.sort(key=lambda j: j.getNextDeadLine())
-            j = 0
-            found = False
-            while j < len(jobs) and not found:
-                if jobs[j].canRun():
-                    jobs[j].run()
-                    found = True
-                j += 1
-
-            if not found:
-                timeline.addEvent(Event(EventType.IDLE), t)
+            for jobManager in jobManagers:
+                jobManager.addTimeUnit()
 
             if t < self.timeLimit:
-                for job in jobs:
-                    job.addTimeUnit()
+                jobList.addTimeUnit()
             t += 1
 
         return timeline
@@ -63,25 +55,77 @@ class EDFScheduler:
         :param tasks: the tasks
         :return: True if schedulable else False
         """
-        timeLimit = max(task.getOffset() + task.getDeadline() for task in tasks)  # TODO verify
+        P = np.lcm.reduce([task.getPeriod() for task in tasks])  # Hyper-Period
+        timeLimit = max(task.getOffset() for task in tasks) + 2 * P  # TODO verify
         t = 0
-        jobs = [JobManager(j) for j in tasks]
+        jobList = EDFJobList()
+        jobManagers = [JobManager(j, jobList) for j in tasks]
 
-        try:
-            while t <= timeLimit:
-                jobs.sort(key=lambda j: j.getNextDeadLine())
-                j = 0
-                found = False
-                while j < len(jobs) and not found:
-                    if jobs[j].canRun():
-                        jobs[j].run()
-                        found = True
-                    j += 1
-                for job in jobs:
-                    job.addTimeUnit()
-                t += 1
+        while t <= timeLimit:  # TODO verify time limit
+            for jobManager in jobManagers:
+                jobManager.addTimeUnit()
 
-        except Exception:
-            return False
+            if t < timeLimit:
+                jobList.addTimeUnit()
+            t += 1
 
+        return jobList.verify()  # TODO P96
+
+
+class EDFJobList:
+    def __init__(self, timeline=None):
+        self.jobList = []
+        self.doneJobList = []
+        self.timeline = timeline
+        self.t = -1
+
+    def add(self, job):
+        self.jobList.append(job)
+        self.jobList.sort(key=lambda j: j.getDeadline())
+
+        if self.timeline is not None:
+            self.timeline.addEvent(Event(EventType.RELEASE, [job.getTaskID(), job.getID()]), job.getReleaseTime())
+
+    def addTimeUnit(self):
+        self.t += 1
+        if len(self.jobList) >= 1:
+            if not self.jobList[0].isFinished():
+                self.runJob()
+            else:
+                self.remove()
+                if len(self.jobList) >= 1:
+                    self.runJob()
+                elif self.timeline is not None:
+                    self.timeline.addEvent(Event(EventType.IDLE), self.t)
+        elif self.timeline is not None:
+            self.timeline.addEvent(Event(EventType.IDLE), self.t)
+
+        i = 0
+        stop = False
+        while i < len(self.doneJobList) and not stop:
+            job = self.doneJobList[i]
+            if job.getDeadline() <= self.t:
+                i += 1
+                if self.timeline is not None:
+                    self.timeline.addEvent(Event(EventType.DEADLINE, [job.getTaskID(), job.getID()]), self.t)
+            else:
+                stop = True
+
+        self.doneJobList = self.doneJobList[i:]
+
+    def remove(self):
+        self.doneJobList.append(self.jobList[0])
+        self.jobList = self.jobList[1:]
+        self.doneJobList.sort(key=lambda j: j.getDeadline())
+
+    def verify(self):
+        for job in self.jobList:
+            if job.getDeadline() < self.t or job.executionTime != job.resources:
+                return False
         return True
+
+    def runJob(self):
+        job = self.jobList[0]
+        job.run()
+        if self.timeline is not None:
+            self.timeline.addEvent(Event(EventType.RUNNING, [job.getTaskID(), job.getID()]), self.t)
