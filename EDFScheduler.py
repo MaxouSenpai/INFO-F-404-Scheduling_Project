@@ -120,7 +120,7 @@ class EDFJobList:
 
     def verify(self):
         for job in self.jobList:
-            if job.getDeadline() < self.t or job.executionTime != job.resources:
+            if job.getDeadline() < self.t or (job.getDeadline() == self.t and job.executionTime != job.resources):
                 return False
         return True
 
