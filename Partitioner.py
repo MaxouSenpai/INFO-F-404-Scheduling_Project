@@ -22,6 +22,8 @@ class Partitioner:
         :return: the partitioned tasks
         """
 
+        self.sortUtilisation(tasks)
+
         if self.heuristic == "ff":
             partitionedTasks = self.firstFit(tasks)
         elif self.heuristic == "wf":
@@ -30,8 +32,6 @@ class Partitioner:
             partitionedTasks = self.bestFit(tasks)
         else:
             partitionedTasks = self.nextFit(tasks)
-
-        self.sortUtilisation(partitionedTasks)
 
         return partitionedTasks
 
@@ -123,13 +123,13 @@ class Partitioner:
 
         return partitionedTasks
 
-    def sortUtilisation(self, partitionedTasks):
+    def sortUtilisation(self, tasks):
         """
         Sort the partitioned tasks given by their utilisation factor
         The sort depends on the sorting option chosen
-        :param partitionedTasks: the partitioned tasks
+        :param tasks: the tasks
         """
-        partitionedTasks.sort(reverse=self.sort == "du", key=lambda core: Partitioner.getUtilisationFactor(core))
+        tasks.sort(reverse=self.sort == "du", key=lambda t: t.getUtilisationFactor())
 
     @staticmethod
     def getUtilisationFactor(tasks):
