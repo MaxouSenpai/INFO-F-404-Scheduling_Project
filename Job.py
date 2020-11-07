@@ -33,5 +33,8 @@ class Job:
     def getTaskID(self):
         return self.tid
 
+    def getExecutionTime(self):
+        return self.executionTime
+
     def __repr__(self):
         return "T{}J{}".format(self.getTaskID(), self.getID())

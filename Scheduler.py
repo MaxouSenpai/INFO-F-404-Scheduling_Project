@@ -69,13 +69,31 @@ class Scheduler:
         t = 0
         jobsList = EDFJobList()
         jobManagers = [JobManager(j, jobsList) for j in tasks]
+        c1, c2 = None, None
 
-        while t <= timeLimit:
+        while t < timeLimit:
+            if t == max(task.getOffset() for task in tasks) + P:
+                c1 = Scheduler.getConfiguration(t, tasks, jobsList)
+
             for jobManager in jobManagers:
                 jobManager.addTimeUnit()
 
-            if t < timeLimit:
-                jobsList.addTimeUnit()
-            t += 1
+            jobsList.addTimeUnit()
 
-        return jobsList.verify()  # TODO P96
+            t += 1
+        c2 = Scheduler.getConfiguration(t, tasks, jobsList)
+        return jobsList.verify() and c1 == c2
+
+    @staticmethod
+    def getConfiguration(t, tasks, jobsList):
+        res = []
+        for task in tasks:
+            if t >= task.getOffset():
+                y = (t - task.getOffset()) % task.getPeriod()
+            else:
+                y = (t - task.getOffset())
+
+            a = jobsList.getAlpha(task.getID())
+            b = jobsList.getBeta(task.getID())
+            res.append([y, a, b])
+        return res

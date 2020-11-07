@@ -81,3 +81,26 @@ class EDFJobList:
         job.run()
         if self.timeline is not None:
             self.timeline.addEvent(Event(EventType.RUNNING, [job.getTaskID(), job.getID()]), self.t)
+
+    def getAlpha(self, taskID):
+        """
+        Return the active jobs of the specified task
+        :param taskID: the id of the task
+        :return: the active jobs of the specified task
+        """
+        n = 0
+        for job in self.jobsList:
+            if job.getTaskID() == taskID:
+                n += 1
+        return n
+
+    def getBeta(self, taskID):
+        """
+        Return the cumulative CPU time of the oldest active job of
+        :param taskID:
+        :return:
+        """
+        for job in self.jobsList:
+            if job.getTaskID() == taskID:
+                return job.getExecutionTime()
+        return 0
