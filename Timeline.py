@@ -6,10 +6,10 @@ class Timeline:
 
     def __init__(self, timeLimit):
         """
-        Construct the Timeline
+        Construct the timeline
         :param timeLimit: the time limit
         """
-        self.events = [[] for _ in range(timeLimit)]
+        self.events = [[] for _ in range(timeLimit + 1)]
         self.order = {EventType.DEADLINE: 0,
                       EventType.RELEASE: 1,
                       EventType.RUNNING: 2,

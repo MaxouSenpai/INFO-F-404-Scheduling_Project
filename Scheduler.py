@@ -40,7 +40,7 @@ class Scheduler:
         :param tasks: the tasks
         :return: the timeline of the execution [0,t]
         """
-        timeline = Timeline(self.timeLimit + 1)
+        timeline = Timeline(self.timeLimit)
         t = 0
         jobsList = EDFJobsList(timeline)
         jobManagers = [JobManager(j, jobsList) for j in tasks]
