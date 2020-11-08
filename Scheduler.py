@@ -1,15 +1,15 @@
 import numpy as np
 
-from EDFJobList import EDFJobList
+from EDFJobsList import EDFJobsList
 from JobManager import JobManager
 from Timeline import Timeline
 
 
 class Scheduler:
-    """Scheduler Object"""
+    """Class that represents a fixed job priority scheduler"""
     def __init__(self, timeLimit, schedulerType):
         """
-        Construct the Scheduler
+        Construct the scheduler
         :param timeLimit: the time limit
         """
         self.timeLimit = timeLimit
@@ -19,7 +19,7 @@ class Scheduler:
         """
         Schedule the specified partitioned tasks
         :param partitionedTasks: the partitioned tasks
-        :return: the timelines of the executions of all the cores
+        :return: the list of the timelines of the executions of all the processor
         """
         return [self.scheduleUniprocessor(tasks) for tasks in partitionedTasks]
 
@@ -38,11 +38,11 @@ class Scheduler:
         """
         Schedule the specified tasks with the earliest deadline first method
         :param tasks: the tasks
-        :return: the timeline of the execution
+        :return: the timeline of the execution [0,t]
         """
         timeline = Timeline(self.timeLimit + 1)
         t = 0
-        jobsList = EDFJobList(timeline)
+        jobsList = EDFJobsList(timeline)
         jobManagers = [JobManager(j, jobsList) for j in tasks]
 
         while t <= self.timeLimit:
@@ -51,6 +51,7 @@ class Scheduler:
 
             if t < self.timeLimit:
                 jobsList.addTimeUnit()
+
             t += 1
 
         return timeline
@@ -66,8 +67,9 @@ class Scheduler:
         """
         P = np.lcm.reduce([task.getPeriod() for task in tasks])  # Hyper-Period
         timeLimit = max(task.getOffset() for task in tasks) + 2 * P
+
         t = 0
-        jobsList = EDFJobList()
+        jobsList = EDFJobsList()
         jobManagers = [JobManager(j, jobsList) for j in tasks]
         c1, c2 = None, None
 
@@ -81,19 +83,24 @@ class Scheduler:
             jobsList.addTimeUnit()
 
             t += 1
+
         c2 = Scheduler.getConfiguration(t, tasks, jobsList)
+
         return jobsList.verify() and c1 == c2
 
     @staticmethod
     def getConfiguration(t, tasks, jobsList):
+        """Return the current configuration"""
         res = []
         for task in tasks:
             if t >= task.getOffset():
                 y = (t - task.getOffset()) % task.getPeriod()
+
             else:
                 y = (t - task.getOffset())
 
             a = jobsList.getAlpha(task.getID())
             b = jobsList.getBeta(task.getID())
             res.append([y, a, b])
+
         return res

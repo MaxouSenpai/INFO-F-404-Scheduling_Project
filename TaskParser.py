@@ -9,7 +9,7 @@ class TaskParser:
         """
         Parse the tasks contained in the specified file
         :param taskFile: the file containing the tasks
-        :return: the parsed tasks
+        :return: the list of the tasks contained in the file
         """
         tasks = []
         with open(taskFile) as file:

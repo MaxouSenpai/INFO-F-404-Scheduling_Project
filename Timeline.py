@@ -2,14 +2,7 @@ from Event import EventType
 
 
 class Timeline:
-    """
-    Timeline Object
-    [t)
-    """
-    order = {EventType.RUNNING: 0,
-             EventType.IDLE: 1,
-             EventType.DEADLINE: 2,
-             EventType.RELEASE: 3}
+    """Class that represents a timeline containing several events [t)"""
 
     def __init__(self, timeLimit):
         """
@@ -17,6 +10,10 @@ class Timeline:
         :param timeLimit: the time limit
         """
         self.events = [[] for _ in range(timeLimit)]
+        self.order = {EventType.DEADLINE: 0,
+                      EventType.RELEASE: 1,
+                      EventType.RUNNING: 2,
+                      EventType.IDLE: 3}
 
     def addEvent(self, event, time):
         """
@@ -30,15 +27,16 @@ class Timeline:
         """
         Sort the timeline
         If there are multiple events at the time,
-        they will be sorted by the order dictionary of the Timeline class
+        they will be sorted by the order dictionary
         """
         for e in self.events:
-            e.sort(key=lambda s: Timeline.order[s.getType()])
+            e.sort(key=lambda s: self.order[s.getType()])
 
-    def __str__(self):
+    def asString(self):
+        """Return the timeline as a string"""
         result = ""
         for t in range(len(self.events)):
             result += str(t) + " : "
-            result += " and ".join(str(e) for e in self.events[t])
+            result += " and ".join(e.asString() for e in self.events[t])
             result += "\n"
         return result

@@ -39,7 +39,7 @@ def prettyPrintTasks(taskSetFile, tasks):
     """
     print("The tasks in " + taskSetFile + " :")
     for task in tasks:
-        print("\t" + str(task))
+        print("\t" + task.asDetailedString())
 
 
 def prettyPrintOptions(heuristic, sort, limit, cores):
@@ -87,7 +87,7 @@ def prettyPrintPartitions(partitions):
     for c in range(len(partitions)):
         print("\tCore {} has ".format(c), end="")
         if len(partitions[c]) > 0:
-            print(" and ".join(t.str() for t in sorted(partitions[c], key=lambda t: t.getID())))
+            print(" and ".join(t.asString() for t in sorted(partitions[c], key=lambda t: t.getID())))
         else:
             print("no task")
 
@@ -101,14 +101,14 @@ def prettyPrintTimelines(timelines):
     for i in range(len(timelines)):
         timelines[i].sort()
         print("\tCore {} :".format(i))
-        print("\t\t" + str(timelines[i]).replace("\n", "\n\t\t"))
+        print("\t\t" + timelines[i].asString().replace("\n", "\n\t\t"))
 
 
 def main():
     """
     Verify that the program has all the required options and then launch it if so
     """
-    if len(sys.argv) < 8:
+    if len(sys.argv) < 8:  # 1 (main.py) + 1 (file) + 3 * 2 (option names + value) = 8 (at least)
         raise Exception("At least three options are needed")
 
     taskSetFile = sys.argv[1]
@@ -135,7 +135,7 @@ def main():
     if heuristic is not None and sort is not None and limit is not None:
         run(taskSetFile, heuristic, sort, limit, cores)
     else:
-        raise Exception("Mandatory option not defined")
+        raise Exception("Mandatory option(s) not defined")
 
 
 if __name__ == '__main__':

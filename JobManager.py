@@ -2,10 +2,10 @@ from Job import Job
 
 
 class JobManager:
-    """JobManager Object"""
+    """Class that is used to release jobs"""
     def __init__(self, task, jobList):
         """
-        Construct the JobManager
+        Construct the jobManager
         :param task: the task
         :param jobList: the jobList
         """
@@ -16,7 +16,7 @@ class JobManager:
         self.nbReleasedJobs = 0
 
     def addTimeUnit(self):
-        """Release a job if it needs to"""
+        """Release a job if it is the time"""
         self.t += 1
 
         if self.isOffsetReached() or (self.isOffsetPassed() and self.isPeriodReached()):
@@ -35,7 +35,7 @@ class JobManager:
         return self.task.getOffset() < self.t
 
     def addJob(self):
-        """Add a job to the list"""
+        """Add a job to the list of jobs"""
         tempJob = Job(self.t, self.t + self.task.getDeadline(), self.task.getWCET(), self.task.getID(),
                       self.nbReleasedJobs)
         self.jobList.add(tempJob)

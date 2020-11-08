@@ -1,7 +1,5 @@
 class Task:
-    """
-    Task Object
-    """
+    """Class that represents a task"""
 
     def __init__(self, offset, WCET, deadline, period, tid=0):
         """
@@ -38,11 +36,11 @@ class Task:
         """Return the id of the task"""
         return self.id
 
-    def str(self):
+    def asString(self):
         """Return the task as a string without detail"""
         return "Task {}".format(self.id)
 
-    def detailedStr(self):
+    def asDetailedString(self):
         """Return the task as a string with all the details"""
         return "Task {} : offset = {} WCET = {} deadline = {} period = {}".format(self.id, self.offset, self.WCET,
                                                                                   self.deadline, self.period)
@@ -52,8 +50,5 @@ class Task:
         return self.WCET / self.period
 
     def __repr__(self):
-        return str(self.offset) + "|" + str(self.WCET) + "|" + str(self.deadline) + "|" + str(self.period)
-
-    def __str__(self):
-        return "Task {} : offset = {} WCET = {} deadline = {} period = {}".format(self.id, self.offset, self.WCET,
-                                                                                  self.deadline, self.period)
+        """Return the representation of the task"""
+        return "Task({},{},{},{},{})".format(self.offset, self.WCET, self.deadline, self.period, self.id)

@@ -2,7 +2,7 @@ from Scheduler import Scheduler
 
 
 class Partitioner:
-    """Partitioner Object"""
+    """Class that represents a partitioner"""
 
     def __init__(self, heuristic, sort, cores):
         """
@@ -61,9 +61,9 @@ class Partitioner:
         :param tasks: the tasks
         :return: the partitioned tasks
         """
-        #  sort by lowest utilisation factor
         partitionedTasks = [[] for _ in range(self.cores)]
         for task in tasks:
+            # sort by lowest utilisation factor
             partitionedTasks.sort(key=lambda ts: Partitioner.getUtilisationFactor(ts))
             i = 0
             placed = False
@@ -83,9 +83,9 @@ class Partitioner:
         :param tasks: the tasks
         :return: the partitioned tasks
         """
-        #  sort by highest utilisation factor
         partitionedTasks = [[] for _ in range(self.cores)]
         for task in tasks:
+            # sort by highest utilisation factor
             partitionedTasks.sort(reverse=True, key=lambda ts: Partitioner.getUtilisationFactor(ts))
             i = 0
             placed = False
@@ -105,11 +105,10 @@ class Partitioner:
         :param tasks: the tasks
         :return: the partitioned tasks
         """
-        #  close processor and take the next one
         partitionedTasks = [[] for _ in range(self.cores)]
         lastUsedCore = 0
         for task in tasks:
-            i = lastUsedCore
+            i = lastUsedCore  # if not schedulable close processor and take the next one
             placed = False
             while i < self.cores and not placed:
                 if Scheduler.isSchedulable(partitionedTasks[i] + [task]):
@@ -125,7 +124,7 @@ class Partitioner:
 
     def sortUtilisation(self, tasks):
         """
-        Sort the partitioned tasks given by their utilisation factor
+        Sort the tasks given by their utilisation factors
         The sort depends on the sorting option chosen
         :param tasks: the tasks
         """
@@ -134,7 +133,7 @@ class Partitioner:
     @staticmethod
     def getUtilisationFactor(tasks):
         """
-        Return the utilisation factor of the tasks
+        Return the sum of all the utilisation factors of the tasks
         :param tasks: the tasks
         :return: the utilisation factor
         """

@@ -1,9 +1,14 @@
 class Event:
-    """Event Object"""
+    """Class that represents an event"""
 
-    def __init__(self, eventType, value=None):
+    def __init__(self, eventType, job=None):
+        """
+        Construct the event
+        :param eventType: the type of the event
+        :param job: the job (can be omitted, for example an idle event)
+        """
         self.eventType = eventType
-        self.value = value
+        self.job = job
 
     def getType(self):
         """Return the type of the event"""
@@ -11,29 +16,24 @@ class Event:
 
     def getValue(self):
         """Return the value of the event"""
-        return self.value
+        return self.job
 
-    def __repr__(self):
-        result = EventType.conversion[self.eventType]
-        if self.value is not None:
-            result += " : T" + str(self.value[0]) + " J" + str(self.value[1])
-        return result
-
-    def __str__(self):
+    def asString(self):
+        """Return the event as a string"""
         if self.eventType == EventType.IDLE:
             return "Nothing is running"
 
         elif self.eventType == EventType.RUNNING:
-            return "T" + str(self.value[0]) + "-J" + str(self.value[1]) + " is running"
+            return self.job.asString() + " is running"
 
         elif self.eventType == EventType.RELEASE:
-            return "T" + str(self.value[0]) + "-J" + str(self.value[1]) + " is released"
+            return self.job.asString() + " is released"
 
         elif self.eventType == EventType.DEADLINE:
-            return "Deadline of T" + str(self.value[0]) + "-J" + str(self.value[1]) + " reached"
+            return "Deadline of " + self.job.asString() + " reached"
 
         else:
-            return "unknown"
+            return "Unknown event"
 
 
 class EventType:
@@ -42,4 +42,4 @@ class EventType:
     RUNNING = 1
     RELEASE = 2
     DEADLINE = 3
-    conversion = {IDLE: "Idle", RUNNING: "Running", RELEASE: "Release", DEADLINE: "Deadline"}
+    toString = {IDLE: "Idle", RUNNING: "Running", RELEASE: "Release", DEADLINE: "Deadline"}
