@@ -1,14 +1,14 @@
 import sys
 
 from Partitioner import Partitioner
-from Scheduler import Scheduler
-from TaskParser import TaskParser
+from EDFScheduler import EDFScheduler
+from Task import Task
 
 
 def run(taskSetFile, heuristic, sort, limit, cores):
     """
-    Run the program with the specified parameters &
-    Print the results in a nice and readable style
+    Run the program with the specified parameters and
+    print the results in a nice and readable style.
     :param taskSetFile: the task set file
     :param heuristic: the heuristic option
     :param sort: the sorting option
@@ -16,11 +16,11 @@ def run(taskSetFile, heuristic, sort, limit, cores):
     :param cores: the number of cores
     """
     partitioner = Partitioner(heuristic, sort, cores)
-    tasks = TaskParser.parse(taskSetFile)
+    tasks = parseTasks(taskSetFile)
     partitionedTask = partitioner.partition(tasks)
 
-    scheduler = Scheduler(limit, "EDF")
-    timelines = scheduler.schedule(partitionedTask)
+    edfScheduler = EDFScheduler()
+    timelines = edfScheduler.scheduleAll(partitionedTask, limit)
 
     prettyPrintTasks(taskSetFile, tasks)
     print()
@@ -33,7 +33,7 @@ def run(taskSetFile, heuristic, sort, limit, cores):
 
 def prettyPrintTasks(taskSetFile, tasks):
     """
-    Print the partitions in a nice and readable style
+    Print the partitions in a nice and readable style.
     :param taskSetFile: the task set file
     :param tasks: the tasks
     """
@@ -44,7 +44,7 @@ def prettyPrintTasks(taskSetFile, tasks):
 
 def prettyPrintOptions(heuristic, sort, limit, cores):
     """
-    Print the options in a nice and readable style
+    Print the options in a nice and readable style.
     :param heuristic: the heuristic option
     :param sort: the sorting option
     :param limit: the time limit option
@@ -80,7 +80,7 @@ def prettyPrintOptions(heuristic, sort, limit, cores):
 
 def prettyPrintPartitions(partitions):
     """
-    Print the partitions in a nice and readable style
+    Print the partitions in a nice and readable style.
     :param partitions: the partitions
     """
     print("The partitions :")
@@ -94,7 +94,7 @@ def prettyPrintPartitions(partitions):
 
 def prettyPrintTimelines(timelines):
     """
-    Print the timelines in a nice and readable style
+    Print the timelines in a nice and readable style.
     :param timelines: the timelines
     """
     print("The EDF scheduling :")
@@ -104,9 +104,26 @@ def prettyPrintTimelines(timelines):
         print("\t\t" + timelines[i].asString().replace("\n", "\n\t\t"))
 
 
+def parseTasks(taskFile):
+    """
+    Parse the tasks contained in the specified file.
+    :param taskFile: the file containing the tasks
+    :return: the list of the tasks contained in the file
+    """
+    tasks = []
+    with open(taskFile) as file:
+        tid = 0
+        for line in file:
+            attr = line.split(" ")
+            if len(attr) == 4:
+                tasks.append(Task(int(attr[0]), int(attr[1]), int(attr[2]), int(attr[3]), tid))
+            tid += 1
+    return tasks
+
+
 def main():
     """
-    Verify that the program has all the required options and then launch it if so
+    Verify that the program has all the required options and then launch it if so.
     """
     if len(sys.argv) < 8:  # 1 (main.py) + 1 (file) + 3 * 2 (option names + value) = 8 (at least)
         raise Exception("At least three options are needed")

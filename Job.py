@@ -1,9 +1,11 @@
 class Job:
-    """Class that represents a job"""
+    """
+    Class that represents a job.
+    """
 
     def __init__(self, releaseTime, deadline, computationRequirement, tid=-1, jid=-1):
         """
-        Construct the job
+        Construct the job.
         :param releaseTime: the release time of the job
         :param deadline: the deadline of the job
         :param computationRequirement: the computation requirement of the job
@@ -18,42 +20,62 @@ class Job:
         self.executionTime = 0
 
     def run(self):
-        """Run the job for an unit of time"""
+        """
+        Run the job for an unit of time.
+        """
         self.executionTime += 1
 
     def isFinished(self):
-        """Return True if the job is finished else False"""
+        """
+        Return True if the job is finished else False.
+        """
         return self.executionTime == self.computationRequirement
 
     def getDeadline(self):
-        """Return the deadline"""
+        """
+        Return the deadline.
+        """
         return self.deadline
 
     def getReleaseTime(self):
-        """Return the release time"""
+        """
+        Return the release time.
+        """
         return self.releaseTime
 
     def getComputationRequirement(self):
-        """Return the computation requirement"""
+        """
+        Return the computation requirement.
+        """
         return self.computationRequirement
 
     def getID(self):
-        """Return the id"""
+        """
+        Return the id.
+        """
         return self.id
 
     def getTaskID(self):
-        """Return the if of the linked task"""
+        """
+        Return the if of the linked task.
+        """
         return self.tid
 
     def getExecutionTime(self):
-        """Return the execution time"""
+        """
+        Return the execution time.
+        """
         return self.executionTime
 
     def asString(self):
-        """Return the job as a string"""
+        """
+        Return the job as a string.
+        """
         return "T{}-J{}".format(self.getTaskID(), self.getID())
 
     def __repr__(self):
-        """Return the representation of the job"""
+        """
+        Return the representation of the job.
+        """
         return "Job({},{},{},{},{},{})".format(self.releaseTime, self.deadline, self.computationRequirement,
                                                self.getTaskID(), self.getID(), self.executionTime)

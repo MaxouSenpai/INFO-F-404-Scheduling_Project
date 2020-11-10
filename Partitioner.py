@@ -1,12 +1,14 @@
-from Scheduler import Scheduler
+from EDFScheduler import EDFScheduler
 
 
 class Partitioner:
-    """Class that represents a partitioner"""
+    """
+    Class that represents a partitioner.
+    """
 
     def __init__(self, heuristic, sort, cores):
         """
-        Construct the partitioner
+        Construct the partitioner.
         :param heuristic: the heuristic method
         :param sort: the sorting method
         :param cores: the number of cores
@@ -17,7 +19,7 @@ class Partitioner:
 
     def partition(self, tasks):
         """
-        Run the partitioner
+        Run the partitioner.
         :param tasks: the tasks
         :return: the partitioned tasks
         """
@@ -37,7 +39,7 @@ class Partitioner:
 
     def firstFit(self, tasks):
         """
-        Run the first fit method
+        Run the first fit method.
         :param tasks: the tasks
         :return: the partitioned tasks
         """
@@ -46,7 +48,7 @@ class Partitioner:
             i = 0
             placed = False
             while i < self.cores and not placed:
-                if Scheduler.isSchedulable(partitionedTasks[i] + [task]):
+                if EDFScheduler().isSchedulable(partitionedTasks[i] + [task]):
                     partitionedTasks[i].append(task)
                     placed = True
                 i += 1
@@ -57,7 +59,7 @@ class Partitioner:
 
     def worstFit(self, tasks):
         """
-        Run the worst fit method
+        Run the worst fit method.
         :param tasks: the tasks
         :return: the partitioned tasks
         """
@@ -68,7 +70,7 @@ class Partitioner:
             i = 0
             placed = False
             while i < self.cores and not placed:
-                if Scheduler.isSchedulable(partitionedTasks[i] + [task]):
+                if EDFScheduler().isSchedulable(partitionedTasks[i] + [task]):
                     partitionedTasks[i].append(task)
                     placed = True
                 i += 1
@@ -79,7 +81,7 @@ class Partitioner:
 
     def bestFit(self, tasks):
         """
-        Run the best fit method
+        Run the best fit method.
         :param tasks: the tasks
         :return: the partitioned tasks
         """
@@ -90,7 +92,7 @@ class Partitioner:
             i = 0
             placed = False
             while i < self.cores and not placed:
-                if Scheduler.isSchedulable(partitionedTasks[i] + [task]):
+                if EDFScheduler().isSchedulable(partitionedTasks[i] + [task]):
                     partitionedTasks[i].append(task)
                     placed = True
                 i += 1
@@ -101,7 +103,7 @@ class Partitioner:
 
     def nextFit(self, tasks):
         """
-        Run the next fit method
+        Run the next fit method.
         :param tasks: the tasks
         :return: the partitioned tasks
         """
@@ -111,7 +113,7 @@ class Partitioner:
             i = lastUsedCore  # if not schedulable close processor and take the next one
             placed = False
             while i < self.cores and not placed:
-                if Scheduler.isSchedulable(partitionedTasks[i] + [task]):
+                if EDFScheduler().isSchedulable(partitionedTasks[i] + [task]):
                     partitionedTasks[i].append(task)
                     placed = True
                 else:
@@ -124,8 +126,8 @@ class Partitioner:
 
     def sortUtilisation(self, tasks):
         """
-        Sort the tasks given by their utilisation factors
-        The sort depends on the sorting option chosen
+        Sort the tasks given by their utilisation factors.
+        The sort depends on the sorting option chosen.
         :param tasks: the tasks
         """
         tasks.sort(reverse=self.sort == "du", key=lambda t: t.getUtilisationFactor())
@@ -133,7 +135,7 @@ class Partitioner:
     @staticmethod
     def getUtilisationFactor(tasks):
         """
-        Return the sum of all the utilisation factors of the tasks
+        Return the sum of all the utilisation factors of the tasks.
         :param tasks: the tasks
         :return: the utilisation factor
         """
