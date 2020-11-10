@@ -1,4 +1,4 @@
-import numpy as np
+import math
 
 from Event import Event
 from Job import Job
@@ -81,7 +81,7 @@ class EDFScheduler:
             self.tasks = tasks
             self.nbReleasedJob = [0 for _ in range(len(tasks))]
 
-            P = np.lcm.reduce([task.getPeriod() for task in tasks])  # Hyper-Period
+            P = math.lcm(*[task.getPeriod() for task in tasks])  # Hyper-Period
             timeLimit = max(task.getOffset() for task in tasks) + 2 * P
 
             c1, c2 = None, None
@@ -129,7 +129,7 @@ class EDFScheduler:
             task = self.tasks[i]
             k = self.nbReleasedJob[i]
             if task.getOffset() + k * task.getPeriod() == self.t:
-                self.releaseJob(Job(self.t, self.t + task.getDeadline(), task.getWCET(), i, k))
+                self.releaseJob(Job(self.t, self.t + task.getDeadline(), task.getWCET(), task.getID(), k))
                 self.nbReleasedJob[i] += 1
 
     def findFinishedJobs(self):
