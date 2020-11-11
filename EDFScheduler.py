@@ -14,7 +14,6 @@ class EDFScheduler:
         Construct the EDFScheduler.
         """
         self.activeJobs = []
-        self.doneJobs = []
         self.timeline = None
         self.tasks = []
         self.t = 0
@@ -25,7 +24,6 @@ class EDFScheduler:
         Reset the EDFScheduler.
         """
         self.activeJobs = []
-        self.doneJobs = []
         self.timeline = None
         self.t = 0
         self.nbReleasedJob = None
@@ -60,7 +58,6 @@ class EDFScheduler:
             self.findJobsToRelease()
             self.findFinishedJobs()
             self.verifyDeadlines()
-            self.findJobsToRemove()
             # at this point t]
             self.findJobToRun()
             # at this point t+1)
@@ -91,7 +88,6 @@ class EDFScheduler:
                 self.findJobsToRelease()
                 self.findFinishedJobs()
                 self.verifyDeadlines()
-                self.findJobsToRemove()
                 # at this point t]
                 if self.t == max(task.getOffset() for task in tasks) + P:
                     c1 = self.getConfiguration()
@@ -120,6 +116,7 @@ class EDFScheduler:
         self.activeJobs.append(job)
         if self.timeline is not None:
             self.timeline.addEvent(Event(Event.Type.RELEASE, job), self.t)
+            self.timeline.addEvent(Event(Event.Type.DEADLINE, job), job.getDeadline())
 
     def findJobsToRelease(self):
         """
@@ -134,13 +131,12 @@ class EDFScheduler:
 
     def findFinishedJobs(self):
         """
-        Move all the finished jobs to the doneJobs list.
+        Remove all the finished jobs.
         """
         i = 0
         while i < len(self.activeJobs):
             job = self.activeJobs[i]
             if job.isFinished():
-                self.doneJobs.append(job)
                 self.activeJobs.remove(job)
             else:
                 i += 1
@@ -158,20 +154,6 @@ class EDFScheduler:
         else:
             if self.timeline is not None:
                 self.timeline.addEvent(Event(Event.Type.IDLE), self.t)
-
-    def findJobsToRemove(self):
-        """
-        Remove all the jobs that have a deadline that is passed.
-        """
-        i = 0
-        while i < len(self.doneJobs):
-            job = self.doneJobs[i]
-            if job.getDeadline() == self.t:
-                self.doneJobs.remove(job)
-                if self.timeline is not None:
-                    self.timeline.addEvent(Event(Event.Type.DEADLINE, job), self.t)
-            else:
-                i += 1
 
     def verifyDeadlines(self):
         """
@@ -229,9 +211,3 @@ class EDFScheduler:
             if job.getTaskID() == taskID:
                 return job.getExecutionTime()
         return 0
-
-    def getTimeline(self):
-        """
-        Return the timeline.
-        """
-        return self.timeline

@@ -20,10 +20,13 @@ class Timeline:
     def addEvent(self, event, time):
         """
         Add an event at a specified time.
+        It adds the event only if the specified
+        time is in the range of the timeline.
         :param event: the event
         :param time: the time
         """
-        self.events[time].append(event)
+        if time < len(self.events):
+            self.events[time].append(event)
 
     def sort(self):
         """
