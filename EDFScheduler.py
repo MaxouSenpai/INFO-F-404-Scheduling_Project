@@ -151,9 +151,6 @@ class EDFScheduler:
             job.run()
             if self.timeline is not None:
                 self.timeline.addEvent(Event(Event.Type.RUNNING, job), self.t)
-        else:
-            if self.timeline is not None:
-                self.timeline.addEvent(Event(Event.Type.IDLE), self.t)
 
     def verifyDeadlines(self):
         """

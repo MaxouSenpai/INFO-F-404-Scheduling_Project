@@ -17,7 +17,13 @@ def run(taskSetFile, heuristic, sort, limit, cores):
     """
     partitioner = Partitioner(heuristic, sort, cores)
     tasks = parseTasks(taskSetFile)
-    partitionedTask = partitioner.partition(tasks)
+
+    try:
+        partitionedTask = partitioner.partition(tasks)
+
+    except Exception:
+        print("Error : It cannot be partitioned!")
+        return
 
     edfScheduler = EDFScheduler()
     timelines = edfScheduler.scheduleAll(partitionedTask, limit)
@@ -38,6 +44,7 @@ def prettyPrintTasks(taskSetFile, tasks):
     :param tasks: the tasks
     """
     print("The tasks in " + taskSetFile + " :")
+    tasks.sort(key=lambda t: t.getID())
     for task in tasks:
         print("\t" + task.asDetailedString())
 
@@ -99,7 +106,6 @@ def prettyPrintTimelines(timelines):
     """
     print("The EDF scheduling :")
     for i in range(len(timelines)):
-        timelines[i].sort()
         print("\tCore {} :".format(i))
         print("\t\t" + timelines[i].asString().replace("\n", "\n\t\t"))
 

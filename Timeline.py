@@ -11,11 +11,10 @@ class Timeline:
         Construct the timeline.
         :param timeLimit: the time limit
         """
-        self.events = [[] for _ in range(timeLimit + 1)]
-        self.order = {Event.Type.DEADLINE: 0,
-                      Event.Type.RELEASE: 1,
-                      Event.Type.RUNNING: 2,
-                      Event.Type.IDLE: 3}
+        self.timeLimit = timeLimit
+        self.cpuState = [Event(Event.Type.IDLE) for _ in range(timeLimit)]
+        self.release = [[] for _ in range(timeLimit + 1)]
+        self.deadline = [[] for _ in range(timeLimit + 1)]
 
     def addEvent(self, event, time):
         """
@@ -25,25 +24,31 @@ class Timeline:
         :param event: the event
         :param time: the time
         """
-        if time < len(self.events):
-            self.events[time].append(event)
-
-    def sort(self):
-        """
-        Sort the timeline.
-        If there are multiple events at the time,
-        they will be sorted by the order dictionary.
-        """
-        for e in self.events:
-            e.sort(key=lambda s: self.order[s.getType()])
+        if time < self.timeLimit + 1:
+            if event.getType() == Event.Type.RELEASE:
+                self.release[time].append(event)
+            elif event.getType() == Event.Type.DEADLINE:
+                self.deadline[time].append(event)
+            elif time < self.timeLimit:
+                self.cpuState[time] = event
 
     def asString(self):
         """
         Return the timeline as a string.
         """
         result = ""
-        for t in range(len(self.events)):
+        for t in range(self.timeLimit + 1):
             result += str(t) + " : "
-            result += " and ".join(e.asString() for e in self.events[t])
+            current = []
+            if len(self.release[t]) > 0:
+                current.append(" and ".join(e.asString() for e in self.release[t]))
+
+            if len(self.deadline[t]) > 0:
+                current.append(" and ".join(e.asString() for e in self.deadline[t]))
+
+            if t < self.timeLimit:
+                current.append(self.cpuState[t].asString())
+
+            result += " || ".join(current)
             result += "\n"
         return result
