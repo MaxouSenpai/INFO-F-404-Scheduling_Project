@@ -11,7 +11,7 @@ class EDFScheduler:
     """
     def __init__(self):
         """
-        Construct the EDFScheduler.
+        Construct the EDF scheduler.
         """
         self.activeJobs = []
         self.timeline = None
@@ -21,10 +21,11 @@ class EDFScheduler:
 
     def reset(self):
         """
-        Reset the EDFScheduler.
+        Reset the EDF scheduler.
         """
         self.activeJobs = []
         self.timeline = None
+        self.tasks = None
         self.t = 0
         self.nbReleasedJob = None
 
@@ -33,7 +34,7 @@ class EDFScheduler:
         Schedule the specified partitioned tasks.
         :param partitionedTasks: the partitioned tasks
         :param timeLimit: the time limit
-        :return: the timelines
+        :return: the list of all the timelines
         """
         timelines = []
         for tasks in partitionedTasks:
@@ -43,7 +44,7 @@ class EDFScheduler:
 
     def schedule(self, tasks, timeLimit):
         """
-        Schedule the specified tasks and complete the timeline [0,timeLimit].
+        Schedule the specified tasks and fill the timeline [0,timeLimit].
         :param tasks: the list of tasks
         :param timeLimit: the time limit
         :return: the timeline
@@ -64,6 +65,7 @@ class EDFScheduler:
             self.t += 1
 
         self.findJobsToRelease()
+        self.findFinishedJobs()
         self.verifyDeadlines()
         return self.timeline
 
@@ -98,10 +100,11 @@ class EDFScheduler:
 
             # at this point timeLimit)
             self.findJobsToRelease()
+            self.findFinishedJobs()
             self.verifyDeadlines()
             # at this point timeLimit]
             c2 = self.getConfiguration()
-            #
+
             return c1 == c2
 
         except Exception:
@@ -188,9 +191,9 @@ class EDFScheduler:
 
     def getAlpha(self, taskID):
         """
-        Return the active jobs of the specified task.
+        Return the number of active jobs of the specified task.
         :param taskID: the id of the task
-        :return: the active jobs of the specified task
+        :return: the number of active jobs of the specified task
         """
         n = 0
         for job in self.activeJobs:
@@ -204,6 +207,7 @@ class EDFScheduler:
         :param taskID: the id of the task
         :return: the cumulative CPU time of the oldest active job of the specified task
         """
+        self.activeJobs.sort(key=lambda j: j.getReleaseTime())
         for job in self.activeJobs:
             if job.getTaskID() == taskID:
                 return job.getExecutionTime()

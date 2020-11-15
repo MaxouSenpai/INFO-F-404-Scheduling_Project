@@ -1,6 +1,7 @@
 class Event:
     """
-    Class that represents an event.
+    Class that represents an event that happened on a processor.
+    The event can be instantaneous or continuous (for one unit of time).
     """
 
     class Type:
@@ -11,7 +12,6 @@ class Event:
         RUNNING = 1
         RELEASE = 2
         DEADLINE = 3
-        toString = {IDLE: "Idle", RUNNING: "Running", RELEASE: "Release", DEADLINE: "Deadline"}
 
     def __init__(self, eventType, job=None):
         """
@@ -30,7 +30,7 @@ class Event:
 
     def getValue(self):
         """
-        Return the value of the event.
+        Return the job linked to the event.
         """
         return self.job
 

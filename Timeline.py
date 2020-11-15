@@ -3,7 +3,7 @@ from Event import Event
 
 class Timeline:
     """
-    Class that represents a timeline containing several events.
+    Class that represents a timeline that can contain several events.
     """
 
     def __init__(self, timeLimit):

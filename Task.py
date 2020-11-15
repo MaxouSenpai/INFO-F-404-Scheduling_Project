@@ -1,6 +1,6 @@
 class Task:
     """
-    Class that represents a task.
+    Class that represents a periodic task.
     """
 
     def __init__(self, offset, WCET, deadline, period, tid=0):

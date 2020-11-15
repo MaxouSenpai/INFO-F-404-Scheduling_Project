@@ -51,13 +51,13 @@ class Job:
 
     def getID(self):
         """
-        Return the id.
+        Return the id of the job.
         """
         return self.id
 
     def getTaskID(self):
         """
-        Return the if of the linked task.
+        Return the id of the task linked to the job.
         """
         return self.tid
 
