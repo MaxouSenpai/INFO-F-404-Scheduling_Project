@@ -6,17 +6,16 @@ class TasksGenerator:
     """
     This class represents a generator of random synchronous systems of tasks with constrained deadlines.
     """
-    def __init__(self, tasksNumber, period, utilisationFactor):
+    def __init__(self, tasksNumber, periodRange, utilisationFactorRange):
         """
         Construct the TasksGenerator.
         :param tasksNumber: the number of tasks to generate
-        :param period: the range of the periods of the tasks
-        :param utilisationFactor: the range of the utilisation factors of the tasks
-        :param period: the range of the periods of the tasks
+        :param periodRange: the range of the periods of the tasks
+        :param utilisationFactorRange: the range of the utilisation factors of the tasks
         """
-        self.utilisationFactor = utilisationFactor
-        self.period = period
+        self.periodRange = periodRange
         self.tasksNumber = tasksNumber
+        self.utilisationFactorRange = utilisationFactorRange
 
     def generate(self, outputFile):
         """
@@ -26,12 +25,12 @@ class TasksGenerator:
         tasks = []
         for i in range(self.tasksNumber):
             offset = 0
-            period = random.randint(self.period[0], self.period[1])
-            lowLimit = int(self.utilisationFactor[0] * period)
+            period = random.randint(self.periodRange[0], self.periodRange[1])
+            lowLimit = int(self.utilisationFactorRange[0] * period)
             # The low limit should be rounded to the next integer
-            if (self.utilisationFactor[0] * period) % 10 != 0:
+            if (self.utilisationFactorRange[0] * period) % 10 != 0:
                 lowLimit += 1
-            upLimit = int(self.utilisationFactor[1] * period)
+            upLimit = int(self.utilisationFactorRange[1] * period)
             wcet = random.randint(lowLimit, upLimit)
             deadline = random.randint(wcet, period)
             tasks.append([offset, wcet, deadline, period])
@@ -49,16 +48,16 @@ class TasksGenerator:
                 file.write("{} {} {} {}\n".format(task[0], task[1], task[2], task[3]))
 
 
-def run(tasksNumber, period, utilisationFactor, outputFile):
+def run(tasksNumber, periodRange, utilisationFactorRange, outputFile):
     """
     Run the generator with the specified options
     :param tasksNumber: the number of tasks to be generated
-    :param period: the range of the periods of the tasks
-    :param utilisationFactor: the range of the utilisation factors of the tasks
+    :param periodRange: the range of the periods of the tasks
+    :param utilisationFactorRange: the range of the utilisation factors of the tasks
     :param outputFile: the file on which the tasks have to be written
     :return:
     """
-    tasksGenerator = TasksGenerator(tasksNumber, period, utilisationFactor)
+    tasksGenerator = TasksGenerator(tasksNumber, periodRange, utilisationFactorRange)
     tasksGenerator.generate(outputFile)
     print("The tasks have successfully been generated and written on the output file")
 
@@ -70,7 +69,7 @@ def main():
     if len(sys.argv) != 9:  # pythonFilename + options (4*2)
         raise Exception("Not the right amount of arguments")
 
-    utilisationFactor, period, tasksNumber, outputFile = None, None, None, None
+    utilisationFactorRange, periodRange, tasksNumber, outputFile = None, None, None, None
     try:
         for i in range(4):
             option = sys.argv[i * 2 + 1]
@@ -81,19 +80,19 @@ def main():
 
             elif option == "-p":
                 lim = value.split(",")
-                period = (int(lim[0]), int(lim[1]))
+                periodRange = (int(lim[0]), int(lim[1]))
 
             elif option == "-u":
                 lim = value.split(",")
-                utilisationFactor = (float(lim[0]), float(lim[1]))
+                utilisationFactorRange = (float(lim[0]), float(lim[1]))
 
             elif option == "-o":
                 outputFile = value
 
-        if tasksNumber is None or period is None or utilisationFactor is None or outputFile is None:
+        if tasksNumber is None or periodRange is None or utilisationFactorRange is None or outputFile is None:
             raise Exception("Mandatory option(s) not defined")
 
-        run(tasksNumber, period, utilisationFactor, outputFile)
+        run(tasksNumber, periodRange, utilisationFactorRange, outputFile)
 
     except:
         raise Exception("Problem(s) detected in the options")
