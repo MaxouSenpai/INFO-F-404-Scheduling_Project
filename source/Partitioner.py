@@ -1,4 +1,4 @@
-from EDFScheduler import EDFScheduler
+from source.EDFScheduler import EDFScheduler
 
 
 class Partitioner:

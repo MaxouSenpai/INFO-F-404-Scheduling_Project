@@ -1,8 +1,8 @@
 import sys
 
-from Partitioner import Partitioner
-from EDFScheduler import EDFScheduler
-from Task import Task
+from source.Partitioner import Partitioner
+from source.EDFScheduler import EDFScheduler
+from source.Task import Task
 
 
 def run(taskSetFile, heuristic, sort, limit, cores):

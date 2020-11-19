@@ -1,8 +1,8 @@
 import math
 
-from Event import Event
-from Job import Job
-from Timeline import Timeline
+from source.Event import Event
+from source.Job import Job
+from source.Timeline import Timeline
 
 
 class EDFScheduler:

@@ -1,4 +1,4 @@
-from Event import Event
+from source.Event import Event
 
 
 class Timeline:
