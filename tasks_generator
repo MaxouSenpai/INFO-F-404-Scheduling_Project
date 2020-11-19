@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
 
-from PartitionedEDF import main
+from TasksGenerator import main
 
 main()
