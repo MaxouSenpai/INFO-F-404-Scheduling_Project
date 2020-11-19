@@ -27,13 +27,13 @@ class TasksGenerator:
         for i in range(self.tasksNumber):
             offset = 0
             period = random.randint(self.period[0], self.period[1])
-            deadline = period
             lowLimit = int(self.utilisationFactor[0] * period)
             # The low limit should be rounded to the next integer
             if (self.utilisationFactor[0] * period) % 10 != 0:
                 lowLimit += 1
             upLimit = int(self.utilisationFactor[1] * period)
             wcet = random.randint(lowLimit, upLimit)
+            deadline = random.randint(wcet, period)
             tasks.append([offset, wcet, deadline, period])
         TasksGenerator.writeTasksToFile(tasks, outputFile)
 
