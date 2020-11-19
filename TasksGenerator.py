@@ -60,7 +60,7 @@ def run(tasksNumber, period, utilisationFactor, outputFile):
     """
     tasksGenerator = TasksGenerator(tasksNumber, period, utilisationFactor)
     tasksGenerator.generate(outputFile)
-    print("The tasks have successfully been generated and written to the output file")
+    print("The tasks have successfully been generated and written on the output file")
 
 
 def main():
